@@ -1,3 +1,47 @@
+try:
+  import usocket as socket
+except:
+  import socket
+
+from machine import Pin
+import network
+
+import esp
+esp.osdebug(None)
+
+import gc
+gc.collect()
+
+ssid = 'FiberHGW_TP959C_2.4GHz'
+password = 'jPDhjhXr'
+
+station = network.WLAN(network.STA_IF)
+
+station.active(True)
+station.connect(ssid, password)
+
+while station.isconnected() == False:
+  pass
+
+print('Connection successful')
+print(station.ifconfig())
+
+M1_forward = Pin(26, Pin.OUT)
+M1_backward = Pin(27,Pin.OUT)
+M2_forward = Pin(12,Pin.OUT)
+M2_backward =Pin(14,Pin.OUT)
+M3_forward = Pin(25,Pin.OUT) 
+M3_backward = Pin(33,Pin.OUT)
+M4_forward = Pin(32,Pin.OUT)
+M4_backward = Pin(13,Pin.OUT)
+
+M1_up = Pin(16,Pin.OUT)
+M2_up = Pin(17,Pin.OUT)
+M3_up = Pin(18,Pin.OUT)
+M4_up = Pin(5,Pin.OUT)
+
+
+
 def web_page():
   if M1_forward.value() & M2_forward.value() & M3_forward.value() & M4_forward.value() == 1:
     gpio_state="Forward"
@@ -5,11 +49,35 @@ def web_page():
     gpio_state="Backward"
   elif M1_forward.value() & M3_forward.value() & M2_backward.value() & M4_backward.value() ==1:
     gpio_state="Right"
-  elif M1_backward.value() & M3_backward.value() & M2_backward.value() & M4_backward.value() ==1:
+  elif M1_backward.value() & M3_backward.value() & M2_forward.value() & M4_forward.value() ==1:
     gpio_state="Left"
   elif  M1_forward.value() & M1_backward.value() & M2_backward.value() & M2_forward.value() & M3_backward.value() & M3_forward.value() & M4_backward.value() & M4_forward.value() == 0:
     gpio_state="Stop"
-  
+  elif M1_up.value() & M2_up.value() == 1:
+    gpio_state="FrontUP"
+  elif M3_up.value() & M4_up.value() == 1:
+    gpio_state="BackUP"
+  elif M1_up.value() == 1:
+    gpio_state="FrontLeftUp"
+  elif M2_up.value() ==1 :
+    gpio_state="FronRightUp"
+  elif M3_up.value() ==1 :
+    gpio_state="BackLeftUp"
+  elif M4_up.value() == 1:
+    gpio_state="BackRightUp"
+  elif M3_up.value() & M4_up.value() == 0:
+    gpio_state="BackDown"
+  elif M1_up.value() & M2_up.value() == 0:
+    gpio_state="FrontDown"
+  elif M1_up.value() == 0:
+    gpio_state="FrontLeftDown"
+  elif M2_up.value() ==0 :
+    gpio_state="FronRightDown"
+  elif M3_up.value() ==0 :
+    gpio_state="BackLeftDown"
+  elif M4_up.value() == 0:
+    gpio_state="BackRightDown"
+    
   html = """<html>
 <head>
 <style>
@@ -208,29 +276,73 @@ def web_page():
   background-color: #008CBA;
   color: white;
 }
+}
+.button14 {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
 
+.button14:hover {
+  background-color: #008CBA;
+  color: white;
+}
+}
+.button15 {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
+
+.button15:hover {
+  background-color: #008CBA;
+  color: white;
+}
+}
+.button16 {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
+
+.button16:hover {
+  background-color: #008CBA;
+  color: white;
+}
+}
+.button17 {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
+
+.button17:hover {
+  background-color: #008CBA;
+  color: white;
+}
 
 
 </style>
 </head>
 <body>
 <p>GPIO state: <strong>""" + gpio_state + """</strong></p>
-<button class="buttonx button6">LeftUPP</button>
-<button class="buttonx button7">LeftDWN</button>
+<a href="/?solup"><button class="buttonx button6">LeftUPP</button></a>
+<a href="/?soldown"><button class="buttonx button7">LeftDWN</button></a>
 <a href="/?forward"><button class="buttony button1">Forwardd</button></a>
-<button class="buttonx button8">RightUP</button>
-<button class="buttonx button9">RightDW</button>
+<a href="/?sagup"><button class="buttonx button8">RightUP</button></a>
+<a href="/?sagdown"><button class="buttonx button9">RightDW</button></a>
+<a href="/?frontup"><button class="buttony button14">FrontUP</button></a>
+<a href="/?frontdown"><button class="buttony button17">FrontDown</button></a>
 <a href="/?left"><br><button class="button button3">Leftt</button></a>
 <a href="/?stop"><button class="buttons button5">Stop</button></a>
 <a href="/?right"><button class="button button4">Right</button></br></a>
-<button class="buttonx button10">LeftUPP</button>
-<button class="buttonx button11">LeftDWN</button>
+<a href="/?soleftupback"><button class="buttonx button10">LeftUPP</button></a>
+<a href="/?soleftdownback"><button class="buttonx button11">LeftDWN</button></a>
 <a href="/?backward"><button class="buttony button2">Backward</button></a>
-<button class="buttonx button12">RightUP</button>
-<button class="buttonx button13">RightDW</button>
-
-
-
+<a href="/?saupback"><button class="buttonx button12">RightUP</button></a>
+<a href="/?sadownback"><button class="buttonx button13">RightDW</button></a>
+<a href="/?backup"><button class="buttony button15">BackUP</button></a>
+<a href="/?arkadown"><button class="buttony button16">BackDown</button></a>
 
 
 </body>
@@ -238,7 +350,7 @@ def web_page():
   return html
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('192.168.1.40', 80))
+s.bind(('192.168.1.37', 80))
 s.listen(5)
 
 while True:
@@ -252,6 +364,18 @@ while True:
   right = request.find('/?right')
   left = request.find('/?left')
   stop = request.find('/?stop')
+  leftup = request.find('/?solup')
+  leftdown = request.find('/?soldown')
+  rightup = request.find('/?sagup')
+  rightdown = request.find('/?sagdown')
+  frontup = request.find('/?frontup')
+  leftupback = request.find('/?soleftupback')
+  leftdownback = request.find('/?soleftdownback')
+  rightupback = request.find('/?saupback')
+  rightdownback = request.find('/?sadownback')
+  backup = request.find('/?backup')
+  backdown = request.find('/?arkadown')
+  frontdown = request.find('/?frontdown')
   if forwardd == 6:
     print('Forward')
     M1_forward.value(1)
@@ -299,10 +423,51 @@ while True:
     M3_backward.value(0)
     M4_forward.value(0)
     M4_backward.value(0)
+  if leftup == 6:
+    M1_up.value(1)
+  if leftdown == 6:
+    M1_up.value(0)
+  if rightup == 6:
+    M2_up.value(1)
+  if rightdown == 6:
+    M2_up.value(0)
+  if frontup == 6:
+    M1_up.value(1)
+    M2_up.value(1)
+  if leftupback == 6:
+    M3_up.value(1)
+  if leftdownback == 6:
+    M3_up.value(0)
+  if rightupback == 6:
+    M4_up.value(1)
+  if rightdownback == 6:
+    M4_up.value(0)
+  if backup == 6:
+    M3_up.value(1)
+    M4_up.value(1)
+  if frontdown == 6:
+    M1_up.value(0)
+    M2_up.value(0)
+  if backdown == 6:
+    M3_up.value(0)
+    M4_up.value(0)
+  
   response = web_page()
   conn.send('HTTP/1.1 200 OK\n')
   conn.send('Content-Type: text/html\n')
   conn.send('Connection: close\n\n')
   conn.sendall(response)
   conn.close()
+
+
+
+
+
+
+
+
+
+
+
+
 
